@@ -4,17 +4,17 @@ const truncateKey = process.argv[3];
 const fs = require('fs');
 fs.stat('data', (err, istats) =>
 {
-	if (err) throw "Can't find input file";
+	if (err) throw new Error("Can't find input file");
 	fs.stat('key', (err, kstats) => 
 	{
-		if (err) throw "Can't find key file";
-		if (kstats.size < istats.size) throw 'Invalid key size.';
+		if (err) throw new Error("Can't find key file");
+		if (kstats.size < istats.size) throw new Error('Invalid key size.');
 	});
 	go();
 });
 function go()
 {
-	if (!filePath) throw 'You must specifed output file path';
+	if (!filePath) throw new Error('You must specifed output file path');
 	console.log(filePath, truncateKey);
 	const key = fs.readFileSync('key');
 	const data = fs.readFileSync('data');
@@ -26,9 +26,9 @@ function go()
 	{
 		resultInt8[i] = keyInt8[i] ^ dataInt8[i];
 	}
-	fs.writeFileSync(filePath, new Buffer.from(result));
+	fs.writeFileSync(filePath, Buffer.from(result));
 	if (truncateKey)
 	{
-		fs.writeFileSync('key', new Buffer.from(keyInt8.slice(data.byteLength).buffer));
+		fs.writeFileSync('key', Buffer.from(keyInt8.slice(data.byteLength).buffer));
 	}
 }

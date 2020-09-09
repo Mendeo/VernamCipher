@@ -6,11 +6,11 @@ const truncateKey = process.argv[3];
 let generateKey = false;
 fs.stat(filePath, (err, istats) =>
 	{
-		if (err) throw "Can't find input file";
+		if (err) throw new Error("Can't find input file");
 		fs.stat('key', (err, kstats) => 
 		{
 			generateKey = err;
-			if (!err && kstats.size < istats.size) throw 'Invalid key size.';
+			if (!err && kstats.size < istats.size) throw new Error('Invalid key size.');
 			go();
 		});
 	});
@@ -27,13 +27,13 @@ function go()
 	{
 		resultInt8[i] = keyUint8[i] ^ dataInt8[i];
 	}
-	fs.writeFileSync('data', new Buffer.from(result));
+	fs.writeFileSync('data', Buffer.from(result));
 	if (generateKey)
 	{
-		fs.writeFileSync('key', new Buffer.from(key));
+		fs.writeFileSync('key', Buffer.from(key));
 	}
 	else if(truncateKey)
 	{
-		fs.writeFileSync('key', new Buffer.from(keyUint8.slice(data.byteLength).buffer))
+		fs.writeFileSync('key', Buffer.from(keyUint8.slice(data.byteLength).buffer))
 	}
 }
