@@ -7,7 +7,7 @@ let rounds = process.argv[3];
 let addition = process.argv[4];
 
 if (!rounds || rounds < 1) rounds = 1;
-console.log(`round: 1`);
+console.log('round: 1');
 let key = crypto.randomBytes(size);
 const keyUint8 = new Uint8Array(key);
 if (rounds > 1)
