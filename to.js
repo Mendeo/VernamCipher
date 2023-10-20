@@ -2,38 +2,57 @@
 const fs = require('fs');
 const crypto = require('crypto');
 const filePath = process.argv[2];
-const truncateKey = process.argv[3];
+const keyFilePath = process.argv[3];
+const truncateKey = process.argv[4];
 let generateKey = false;
 fs.stat(filePath, (err, istats) =>
+{
+	if (err)
 	{
-		if (err) throw new Error("Can't find input file");
-		fs.stat('key', (err, kstats) => 
+		console.error('Can\'t open input file');
+		return;
+	}
+	if (keyFilePath)
+	{
+		fs.stat(keyFilePath, (err, kstats) =>
 		{
-			generateKey = err;
-			if (!err && kstats.size < istats.size) throw new Error('Invalid key size.');
+			if (err)
+			{
+				console.error('Can\'t open key file');
+				return;
+			}
+			else if (kstats.size < istats.size)
+			{
+				console.error('Key file size must be greate or equal the input file size.');
+				return;
+			}
 			go();
 		});
-	});
+	}
+	else
+	{
+		generateKey = true;
+		go();
+	}
+});
 function go()
 {
-	console.log(filePath, truncateKey);
 	const data = fs.readFileSync(filePath);
-	const key = generateKey ? crypto.randomBytes(data.byteLength) : fs.readFileSync('key');
-	const dataInt8 = new Int8Array(data);
+	const key = generateKey ? crypto.randomBytes(data.byteLength) : fs.readFileSync(keyFilePath);
+	const dataUint8 = new Uint8Array(data);
 	const keyUint8 = new Uint8Array(key);
-	const result = new ArrayBuffer(data.byteLength);
-	const resultInt8 = new Int8Array(result);
-	for (let i = 0; i < resultInt8.length; i++)
+	const resultUint8 = new Uint8Array(data.length);
+	for (let i = 0; i < resultUint8.length; i++)
 	{
-		resultInt8[i] = keyUint8[i] ^ dataInt8[i];
+		resultUint8[i] = keyUint8[i] ^ dataUint8[i];
 	}
-	fs.writeFileSync('data', Buffer.from(result));
+	fs.writeFileSync('data', Buffer.from(resultUint8));
 	if (generateKey)
 	{
 		fs.writeFileSync('key', Buffer.from(key));
 	}
 	else if(truncateKey)
 	{
-		fs.writeFileSync('key', Buffer.from(keyUint8.slice(data.byteLength).buffer))
+		fs.writeFileSync('key', Buffer.from(keyUint8.slice(data.byteLength).buffer));
 	}
 }
