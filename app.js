@@ -1,10 +1,8 @@
 'use strict';
 const fs = require('fs');
-const crypto = require('crypto');
 const filePath = process.argv[2];
 const keyFilePath = process.argv[3];
 const truncateKey = process.argv[4];
-let generateKey = false;
 fs.stat(filePath, (err, istats) =>
 {
 	if (err)
@@ -29,16 +27,11 @@ fs.stat(filePath, (err, istats) =>
 			go();
 		});
 	}
-	else
-	{
-		generateKey = true;
-		go();
-	}
 });
 function go()
 {
 	const data = fs.readFileSync(filePath);
-	const key = generateKey ? crypto.randomBytes(data.byteLength) : fs.readFileSync(keyFilePath);
+	const key = fs.readFileSync(keyFilePath);
 	const dataUint8 = new Uint8Array(data);
 	const keyUint8 = new Uint8Array(key);
 	const resultUint8 = new Uint8Array(data.length);
@@ -47,11 +40,7 @@ function go()
 		resultUint8[i] = keyUint8[i] ^ dataUint8[i];
 	}
 	fs.writeFileSync('data', Buffer.from(resultUint8));
-	if (generateKey)
-	{
-		fs.writeFileSync('key', Buffer.from(key));
-	}
-	else if(truncateKey)
+	if(truncateKey)
 	{
 		fs.writeFileSync('key', Buffer.from(keyUint8.slice(data.byteLength).buffer));
 	}
