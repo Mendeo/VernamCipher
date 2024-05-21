@@ -58,7 +58,7 @@ else
 
 function writeKey()
 {
-	console.log('Writing to file...');
+	console.log('Writing to the file...');
 	fs.writeFileSync('key', Buffer.from(key));
 }
 
